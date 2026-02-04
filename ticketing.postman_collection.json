@@ -1,0 +1,227 @@
+{
+  "info": {
+    "name": "Ticketing API (Interview Prototype)",
+    "_postman_id": "c47a8b4c-1b39-4c8f-9e1e-000000000001",
+    "description": "Customer/Admin/External ticket flows for the interview prototype.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8000" },
+    { "key": "customerEmail", "value": "alice@example.com" },
+    { "key": "adminEmail", "value": "admin@example.com" },
+    { "key": "ticketId", "value": "1" },
+    { "key": "externalApiKey", "value": "5qNY2ZWpPp0Jvk-MCYAvfK4eUf_s-eHjpEphHx60lZo" }
+  ],
+  "item": [
+    {
+      "name": "Customer",
+      "item": [
+        {
+          "name": "Create Ticket (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-ROLE", "value": "customer" },
+              { "key": "X-USER", "value": "{{customerEmail}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["customer", "tickets"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Payment failed\",\n  \"description\": \"Card charged but order not created\",\n  \"priority\": \"high\",\n  \"category\": \"billing\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List My Tickets (Customer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-ROLE", "value": "customer" },
+              { "key": "X-USER", "value": "{{customerEmail}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["customer", "tickets"]
+            }
+          }
+        },
+        {
+          "name": "Get Ticket Details (Customer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-ROLE", "value": "customer" },
+              { "key": "X-USER", "value": "{{customerEmail}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/tickets/{{ticketId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["customer", "tickets", "{{ticketId}}"]
+            }
+          }
+        },
+        {
+          "name": "Add Comment (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-ROLE", "value": "customer" },
+              { "key": "X-USER", "value": "{{customerEmail}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/tickets/{{ticketId}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["customer", "tickets", "{{ticketId}}", "comments"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Any update?\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Close Ticket (Customer, only if resolved)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-ROLE", "value": "customer" },
+              { "key": "X-USER", "value": "{{customerEmail}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/tickets/{{ticketId}}/close",
+              "host": ["{{baseUrl}}"],
+              "path": ["customer", "tickets", "{{ticketId}}", "close"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "List Tickets (Admin, with filters)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-ROLE", "value": "admin" },
+              { "key": "X-USER", "value": "{{adminEmail}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/tickets?status=open&priority=high&q=payment",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "tickets"],
+              "query": [
+                { "key": "status", "value": "open" },
+                { "key": "priority", "value": "high" },
+                { "key": "q", "value": "payment" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Ticket Details (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-ROLE", "value": "admin" },
+              { "key": "X-USER", "value": "{{adminEmail}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/tickets/{{ticketId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "tickets", "{{ticketId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Ticket (Admin: status/priority/assignee/fields)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-ROLE", "value": "admin" },
+              { "key": "X-USER", "value": "{{adminEmail}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/tickets/{{ticketId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "tickets", "{{ticketId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assigned_to\": \"agent1@example.com\",\n  \"status\": \"in_progress\",\n  \"priority\": \"high\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Add Admin Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-ROLE", "value": "admin" },
+              { "key": "X-USER", "value": "{{adminEmail}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/tickets/{{ticketId}}/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "tickets", "{{ticketId}}", "comments"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Investigating and will update soon.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Ticket Stats (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-ROLE", "value": "admin" },
+              { "key": "X-USER", "value": "{{adminEmail}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/tickets/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "tickets", "stats"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "External",
+      "item": [
+        {
+          "name": "Ingest External Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-API-KEY", "value": "{{externalApiKey}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/external/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["external", "tickets"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"external_ref\": \"EXT-1001\",\n  \"title\": \"Partner incident\",\n  \"description\": \"Webhook failures detected\",\n  \"priority\": \"medium\",\n  \"customer_id\": \"partner-user@example.com\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+
