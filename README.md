@@ -1,4 +1,4 @@
-# Ticket Management System (Interview Prototype)
+# Ticket Management System
 
 A small, working **Ticket Management System** with:
 
@@ -6,7 +6,7 @@ A small, working **Ticket Management System** with:
 - **Admin flow** to manage/assign/resolve tickets
 - **External integration endpoint** to ingest tickets from another system (API key protected)
 
-This is intentionally **time-boxed for interview evaluation** (clean foundation, not production auth).
+This is a small but complete prototype with a **clean foundation**, not a production-ready system.
 
 ---
 
@@ -21,10 +21,11 @@ This is intentionally **time-boxed for interview evaluation** (clean foundation,
 
 ## Quickstart
 
-From the project root:
+Clone the repo and enter the project folder:
 
 ```bash
-cd "/Users/imacslim2015/Desktop/green/ticketing"
+git clone https://github.com/ugaly/green-ticketing.git
+cd green-ticketing
 
 python3 -m venv .venv
 source .venv/bin/activate
@@ -40,14 +41,15 @@ API will be available at `http://127.0.0.1:8000/`.
 
 ---
 
-## Docker (recommended for interviews)
+## Docker
 
 This avoids local Python/pip SSL quirks and gives you a clean “pro” story.
 
 ### Build + run
 
 ```bash
-cd "/Users/imacslim2015/Desktop/green/ticketing"
+git clone https://github.com/ugaly/green-ticketing.git
+cd green-ticketing
 cp .env.example .env
 
 docker compose up --build
@@ -103,7 +105,7 @@ The built-in Django admin UI is available at:
 
 - `GET /django-admin/`
 
-It was moved from `/admin/` so we can use the interview-required API path `/admin/tickets`.
+It was moved from `/admin/` so we can use the API path `/admin/tickets`.
 
 ---
 
