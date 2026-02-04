@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from tickets.models import Comment, Ticket
+from tickets.models import Category, Comment, Ticket, TicketAttachment
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -34,24 +34,17 @@ class TicketListSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class TicketDetailSerializer(TicketListSerializer):
-    comments = CommentSerializer(many=True, read_only=True)
-
-    class Meta(TicketListSerializer.Meta):
-        fields = TicketListSerializer.Meta.fields + ("comments",)
-
-
 class TicketCreateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200, allow_blank=False, trim_whitespace=True)
     description = serializers.CharField(required=False, allow_blank=True)
     priority = serializers.ChoiceField(choices=Ticket.Priority.choices, required=False)
-    category = serializers.ChoiceField(choices=Ticket.Category.choices, required=False)
+    category = serializers.CharField(required=False, max_length=50)
 
 
 class TicketAdminUpdateSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=Ticket.Status.choices, required=False)
     priority = serializers.ChoiceField(choices=Ticket.Priority.choices, required=False)
-    category = serializers.ChoiceField(choices=Ticket.Category.choices, required=False)
+    category = serializers.CharField(required=False, max_length=50)
     assigned_to = serializers.EmailField(required=False, allow_null=True)
     title = serializers.CharField(required=False, max_length=200, allow_blank=False, trim_whitespace=True)
     description = serializers.CharField(required=False, allow_blank=True)
@@ -62,6 +55,35 @@ class ExternalTicketIngestSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200, allow_blank=False, trim_whitespace=True)
     description = serializers.CharField(required=False, allow_blank=True)
     priority = serializers.ChoiceField(choices=Ticket.Priority.choices, required=False)
-    category = serializers.ChoiceField(choices=Ticket.Category.choices, required=False)
+    category = serializers.CharField(required=False, max_length=50)
     customer_id = serializers.EmailField(required=False, allow_null=True)
 
+
+class TicketAttachmentSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TicketAttachment
+        fields = ("id", "url", "created_at")
+        read_only_fields = fields
+
+    def get_url(self, obj) -> str:
+        request = self.context.get("request")
+        url = obj.file.url
+        if request is not None:
+            return request.build_absolute_uri(url)
+        return url
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ("id", "name")
+        read_only_fields = fields
+
+class TicketDetailSerializer(TicketListSerializer):
+    comments = CommentSerializer(many=True, read_only=True)
+    attachments = TicketAttachmentSerializer(many=True, read_only=True)
+
+    class Meta(TicketListSerializer.Meta):
+        fields = TicketListSerializer.Meta.fields + ("comments", "attachments")

@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from tickets.api.serializers import ExternalTicketIngestSerializer
-from tickets.domain.services import create_external_ticket
+from tickets.domain.services import add_attachments, create_external_ticket
 
 
 class ExternalTicketIngestView(APIView):
@@ -26,11 +26,26 @@ class ExternalTicketIngestView(APIView):
         serializer.is_valid(raise_exception=True)
 
         ticket = create_external_ticket(data=serializer.validated_data)
+
+        # Optional file uploads (multiple) via multipart/form-data, field name: "attachments"
+        files = request.FILES.getlist("attachments")
+        if files:
+            add_attachments(ticket=ticket, files=files)
+
+        # Build absolute URLs for attachments in response
+        attachments = []
+        for attachment in ticket.attachments.all():
+            url = attachment.file.url
+            if request is not None:
+                url = request.build_absolute_uri(url)
+            attachments.append(url)
+
         return Response(
             {
                 "ticket_id": ticket.id,
                 "external_ref": ticket.external_ref,
                 "status": ticket.status,
+                "attachments": attachments,
             },
             status=status.HTTP_201_CREATED,
         )

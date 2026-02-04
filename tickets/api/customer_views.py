@@ -12,7 +12,7 @@ from tickets.api.serializers import (
 from tickets.domain.actor import get_actor_from_request
 from tickets.domain.permissions import require_role
 from tickets.domain.selectors import customer_ticket_qs, get_customer_ticket_or_404
-from tickets.domain.services import add_comment, create_customer_ticket, customer_close_ticket
+from tickets.domain.services import add_attachments, add_comment, create_customer_ticket, customer_close_ticket
 from tickets.models import Comment
 
 
@@ -48,7 +48,12 @@ class CustomerTicketListCreateView(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         ticket = create_customer_ticket(customer_email=actor.user, data=serializer.validated_data)
-        return Response(TicketDetailSerializer(ticket).data, status=status.HTTP_201_CREATED)
+        # Optional file uploads (multiple) via multipart/form-data, field name: "attachments"
+        files = request.FILES.getlist("attachments")
+        if files:
+            add_attachments(ticket=ticket, files=files, uploaded_by=actor.user)
+
+        return Response(TicketDetailSerializer(ticket, context={"request": request}).data, status=status.HTTP_201_CREATED)
 
 
 class CustomerTicketDetailView(generics.RetrieveAPIView):

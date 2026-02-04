@@ -6,6 +6,7 @@ from tickets.api.admin_views import (
     AdminTicketRetrieveUpdateView,
     AdminTicketStatsView,
 )
+from tickets.api.category_views import CategoryListView
 from tickets.api.customer_views import (
     CustomerTicketCloseView,
     CustomerTicketCommentCreateView,
@@ -40,5 +41,7 @@ urlpatterns = [
     ),
     # External
     path("external/tickets", ExternalTicketIngestView.as_view(), name="external-ticket-ingest"),
+    # Categories (for frontend dropdowns)
+    path("categories", CategoryListView.as_view(), name="category-list"),
 ]
 

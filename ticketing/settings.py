@@ -60,6 +60,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # Simple CORS for local frontend (e.g. http://localhost:3000)
+    'ticketing.middleware.SimpleCORSMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -135,6 +137,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Media files (uploaded attachments)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 # Django REST Framework
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
@@ -148,6 +154,12 @@ REST_FRAMEWORK = {
         "rest_framework.filters.OrderingFilter",
     ],
 }
+
+# CORS: allow local frontend on port 3000
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 
 # Shared secret for external ingestion endpoint
 EXTERNAL_TICKET_API_KEY = os.environ.get("EXTERNAL_TICKET_API_KEY", "dev-external-api-key")

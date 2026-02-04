@@ -6,7 +6,7 @@ from typing import Any
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
-from tickets.models import Comment, Ticket
+from tickets.models import Comment, Ticket, TicketAttachment
 
 
 @dataclass(frozen=True, slots=True)
@@ -23,7 +23,7 @@ def create_customer_ticket(*, customer_email: str, data: dict[str, Any]) -> Tick
         title=data["title"],
         description=data.get("description", "") or "",
         priority=data.get("priority", Ticket.Priority.MEDIUM),
-        category=data.get("category", Ticket.Category.GENERAL),
+        category=data.get("category", "general"),
         status=Ticket.Status.OPEN,
     )
     ticket.full_clean()
@@ -40,7 +40,7 @@ def create_external_ticket(*, data: dict[str, Any]) -> Ticket:
         title=data["title"],
         description=data.get("description", "") or "",
         priority=data.get("priority", Ticket.Priority.MEDIUM),
-        category=data.get("category", Ticket.Category.GENERAL),
+        category=data.get("category", "general"),
         status=Ticket.Status.OPEN,
     )
     ticket.full_clean()
@@ -54,6 +54,22 @@ def add_comment(*, ticket: Ticket, author: str, role: str, message: str) -> Comm
     comment.full_clean()
     comment.save()
     return comment
+
+
+@transaction.atomic
+def add_attachments(*, ticket: Ticket, files, uploaded_by: str | None = None) -> list[TicketAttachment]:
+    """
+    Attach one or more uploaded files to a ticket.
+
+    `files` is expected to be an iterable of UploadedFile objects (e.g. request.FILES.getlist()).
+    """
+    attachments: list[TicketAttachment] = []
+    for f in files:
+        attachment = TicketAttachment(ticket=ticket, file=f)
+        attachment.full_clean()
+        attachment.save()
+        attachments.append(attachment)
+    return attachments
 
 
 @transaction.atomic

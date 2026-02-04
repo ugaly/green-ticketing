@@ -17,7 +17,7 @@
       "name": "Customer",
       "item": [
         {
-          "name": "Create Ticket (Customer)",
+          "name": "Create Ticket (Customer, JSON)",
           "request": {
             "method": "POST",
             "header": [
@@ -33,6 +33,31 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Payment failed\",\n  \"description\": \"Card charged but order not created\",\n  \"priority\": \"high\",\n  \"category\": \"billing\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Ticket (Customer, with attachments)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-ROLE", "value": "customer" },
+              { "key": "X-USER", "value": "{{customerEmail}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["customer", "tickets"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Payment failed", "type": "text" },
+                { "key": "description", "value": "Card charged but order not created", "type": "text" },
+                { "key": "priority", "value": "high", "type": "text" },
+                { "key": "category", "value": "billing", "type": "text" },
+                { "key": "attachments", "type": "file", "src": [] }
+              ]
             }
           }
         },
@@ -103,6 +128,23 @@
         }
       ]
     },
+    {
+      "name": "Meta",
+      "item": [
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"]
+            }
+          }
+        }
+      ]
+    }
     {
       "name": "Admin",
       "item": [
@@ -202,7 +244,7 @@
       "name": "External",
       "item": [
         {
-          "name": "Ingest External Ticket",
+          "name": "Ingest External Ticket (JSON)",
           "request": {
             "method": "POST",
             "header": [
@@ -217,6 +259,31 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"external_ref\": \"EXT-1001\",\n  \"title\": \"Partner incident\",\n  \"description\": \"Webhook failures detected\",\n  \"priority\": \"medium\",\n  \"customer_id\": \"partner-user@example.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Ingest External Ticket (with attachments)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-API-KEY", "value": "{{externalApiKey}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/external/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["external", "tickets"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "external_ref", "value": "EXT-1001", "type": "text" },
+                { "key": "title", "value": "Partner incident", "type": "text" },
+                { "key": "description", "value": "Webhook failures detected", "type": "text" },
+                { "key": "priority", "value": "medium", "type": "text" },
+                { "key": "customer_id", "value": "partner-user@example.com", "type": "text" },
+                { "key": "attachments", "type": "file", "src": [] }
+              ]
             }
           }
         }

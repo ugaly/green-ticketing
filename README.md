@@ -182,6 +182,23 @@ Set them in your `.env`:
 - `message`
 - `created_at`
 
+### Category
+
+- `id`
+- `name` (unique)
+
+### TicketAttachment
+
+- `id`
+- `ticket_id`
+- `file` (stored under `media/attachments/...`)
+- `created_at`
+
+On startup, a few default categories are **seeded automatically**:
+- `"billing"`, `"technical"`, `"general"`
+
+Admins can add/edit/delete categories via Django admin at `/django-admin/tickets/category/`.
+
 ---
 
 ## API Endpoints
@@ -190,7 +207,7 @@ All endpoints speak **JSON**.
 
 ### Customer Endpoints
 
-#### Create ticket
+#### Create ticket (JSON)
 
 ```bash
 curl -s -X POST "http://127.0.0.1:8000/customer/tickets" \
@@ -198,6 +215,20 @@ curl -s -X POST "http://127.0.0.1:8000/customer/tickets" \
   -H "X-ROLE: customer" \
   -H "X-USER: alice@example.com" \
   -d '{"title":"Refund not received","description":"Please check","priority":"high","category":"billing"}'
+```
+
+#### Create ticket (with file attachments, optional)
+
+```bash
+curl -s -X POST "http://127.0.0.1:8000/customer/tickets" \
+  -H "X-ROLE: customer" \
+  -H "X-USER: alice@example.com" \
+  -F "title=Refund not received" \
+  -F "description=Please check" \
+  -F "priority=high" \
+  -F "category=billing" \
+  -F "attachments=@/path/to/screenshot1.png" \
+  -F "attachments=@/path/to/screenshot2.log"
 ```
 
 #### List own tickets (paginated)
@@ -294,6 +325,7 @@ curl -s "http://127.0.0.1:8000/admin/tickets/stats" \
 
 Protected by:
 - `X-API-KEY: <EXTERNAL_TICKET_API_KEY>`
+#### JSON only
 
 ```bash
 curl -s -X POST "http://127.0.0.1:8000/external/tickets" \
@@ -302,8 +334,39 @@ curl -s -X POST "http://127.0.0.1:8000/external/tickets" \
   -d '{"external_ref":"EXT-123","title":"Partner system alert","description":"Something broke","priority":"medium"}'
 ```
 
+#### With file attachments (optional)
+
+```bash
+curl -s -X POST "http://127.0.0.1:8000/external/tickets" \
+  -H "X-API-KEY: dev-external-api-key" \
+  -F "external_ref=EXT-123" \
+  -F "title=Partner system alert" \
+  -F "description=Something broke" \
+  -F "priority=medium" \
+  -F "attachments=@/path/to/log.txt" \
+  -F "attachments=@/path/to/screenshot.png"
+```
+
 Response:
-- `ticket_id`, `external_ref`, `status`
+- `ticket_id`, `external_ref`, `status`, `attachments: [absolute_url, ...]`
+
+### Category Endpoint
+
+Public endpoint for frontend dropdowns:
+
+```bash
+curl -s "http://127.0.0.1:8000/categories"
+```
+
+Response example:
+
+```json
+[
+  { "id": 1, "name": "billing" },
+  { "id": 2, "name": "technical" },
+  { "id": 3, "name": "general" }
+]
+```
 
 ---
 

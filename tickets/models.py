@@ -1,6 +1,16 @@
 from django.db import models
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class Ticket(models.Model):
     class Source(models.TextChoices):
         CUSTOMER = "customer", "Customer"
@@ -16,11 +26,6 @@ class Ticket(models.Model):
         IN_PROGRESS = "in_progress", "In progress"
         RESOLVED = "resolved", "Resolved"
         CLOSED = "closed", "Closed"
-
-    class Category(models.TextChoices):
-        BILLING = "billing", "Billing"
-        TECHNICAL = "technical", "Technical"
-        GENERAL = "general", "General"
 
     source = models.CharField(max_length=20, choices=Source.choices)
     external_ref = models.CharField(max_length=120, blank=True, null=True)
@@ -39,9 +44,8 @@ class Ticket(models.Model):
         default=Status.OPEN,
     )
     category = models.CharField(
-        max_length=20,
-        choices=Category.choices,
-        default=Category.GENERAL,
+        max_length=50,
+        default="general",
     )
 
     customer_id = models.EmailField(blank=True, null=True)
@@ -91,4 +95,20 @@ class Comment(models.Model):
 
     def __str__(self) -> str:
         return f"Comment #{self.pk} on Ticket #{self.ticket_id}"
+
+
+class TicketAttachment(models.Model):
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="attachments")
+    file = models.FileField(upload_to="attachments/%Y/%m/%d/")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+        indexes = [
+            models.Index(fields=["ticket", "created_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"Attachment #{self.pk} on Ticket #{self.ticket_id}"
+
 

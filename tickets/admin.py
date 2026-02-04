@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import Comment, Ticket
+from .models import Category, Comment, Ticket, TicketAttachment
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ("id", "name")
+    search_fields = ("name",)
+    ordering = ("name",)
 
 
 @admin.register(Ticket)
@@ -27,6 +34,15 @@ class CommentAdmin(admin.ModelAdmin):
     list_display = ("id", "ticket", "role", "author", "created_at")
     list_filter = ("role", "created_at")
     search_fields = ("author", "message")
+    readonly_fields = ("created_at",)
+    ordering = ("-created_at",)
+
+
+@admin.register(TicketAttachment)
+class TicketAttachmentAdmin(admin.ModelAdmin):
+    list_display = ("id", "ticket", "file", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("file",)
     readonly_fields = ("created_at",)
     ordering = ("-created_at",)
 
